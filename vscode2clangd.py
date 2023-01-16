@@ -45,7 +45,7 @@ def main() -> None:
     
     # Read environment variables:
     env: t.Dict[str, t.Union[int, bool, str, t.List, None]] = {
-        "workspaceFolder": "./"
+        "workspaceFolder": str(Path("./"))
     }
     
     if (properties.get('env') == None):
@@ -60,27 +60,51 @@ def main() -> None:
                     if (type(properties['env'][var][i]) != str): continue
                     subitem: t.Union[str, None, bool] = substitute_env_var(properties['env'][var][i], env)
                     
-                    if (type(subitem) == Exception):
+                    if (subitem == False):
                         return
                     
-                    properties['env'][var][i] = subitem
+                    elif (subitem != None):
+                        properties['env'][var][i] = subitem
             
             elif (type(properties['env'][var]) == str):
                 subitem: t.Union[str, None, bool] = substitute_env_var(properties['env'][var], env)
                 
-                if (type(subitem) == Exception):
+                if (subitem == False):
                     return
-                    
-                properties['env'][var] = subitem
                 
+                elif (subitem != None):    
+                    properties['env'][var] = subitem
                     
             env.update({var: properties['env'][var]})
     
-    print(env)
+    print(f"- enviornment variables: {env}")
+    
+    configs: t.Dict[str, t.Any] = {
+        "CompileFlags": None
+    }
     
     # Read Configurations
     for configuration in properties['configurations']:
         print(f"- found configuration '{configuration['name']}'")
+        config: t.Dict[str, t.Any] = {}
+        
+        if (configuration.get('compilerPath') == None):
+            print(f"- 'compilerPath' key in {configuration['name']} configuartion not found, skipping...")
+        
+        else:
+            print(configuration['compilerPath'])
+        
+        if (configuration.get('compilerArgs') == None):
+            print(f"- 'compilerArgs' key in {configuration['name']} configuration not found, skipping...")
+        
+        else:
+            print(configuration['compilerArgs'])
+        
+        if (configuration.get('includePath') == None):
+            print(f"- 'includePath' key not found in {configuration['name']} configuration, skipping...")
+        
+        else:
+            print(configuration['includePath'])
 
 if __name__ == "__main__":
     main()
